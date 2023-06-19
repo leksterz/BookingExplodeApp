@@ -51,7 +51,7 @@ class Booking(models.Model):
 class Schedule(models.Model):
     engineer = models.ForeignKey(Engineer, on_delete=models.CASCADE)
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE)
-    date = models.DateField()
+    date = models.DateField(default=date.today)
     start_time = models.TimeField()
     end_time = models.TimeField()
 
