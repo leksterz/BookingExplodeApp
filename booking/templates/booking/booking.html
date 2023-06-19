@@ -1,6 +1,14 @@
 
+
 {% block content %}
-  <h1>Schedule</h1>
+  <h1>Book a Session</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Book Now</button>
+  </form>
+  <hr>
+  <h2>Schedule</h2>
   <table>
     <thead>
       <tr>
@@ -13,7 +21,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for schedule in schedule_data %}
+      {% for schedule in schedule_list %}
         <tr>
           <td>{{ schedule.date }}</td>
           <td>{{ schedule.engineer.name }}</td>
@@ -21,6 +29,10 @@
           <td>{{ schedule.start_time }}</td>
           <td>{{ schedule.end_time }}</td>
           <td>{{ schedule.availability }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="6">No schedule available</td>
         </tr>
       {% endfor %}
     </tbody>
