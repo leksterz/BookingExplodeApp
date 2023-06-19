@@ -33,6 +33,10 @@ class BookingForm(forms.ModelForm):
             )
             if not schedule_qs.exists():
                 raise ValidationError("Invalid start time or end time.")
+            
+            
+            ##^^ Salikt taa lai var nobookot uz vairaakaam stundaam vienaa requestaa, ne tikai 1 stundu.
+            ##
 
             # Check if there are any conflicting bookings for the selected start time and end time
             # booking_qs = Booking.objects.filter(
