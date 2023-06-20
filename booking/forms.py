@@ -40,7 +40,8 @@ class BookingForm(forms.ModelForm):
             # Check if the start time and end time are equal
             if start_time == end_time:
                 raise ValidationError("Start time and end time cannot be the same.")
-
+            
+            # Check if the selected time duration is not an exact 1 hr time increment
             start_datetime = datetime.combine(datetime.today(), start_time)
             end_datetime = datetime.combine(datetime.today(), end_time)
             selected_duration = end_datetime - start_datetime
@@ -48,7 +49,16 @@ class BookingForm(forms.ModelForm):
             if selected_duration.total_seconds() % 3600 != 0:
                 raise ValidationError("Selected duration must be in full-hour increments.")
 
-            print(f"Selected Duration: {selected_duration}")
+            # Check if the selected start time is available in the schedule
+            start_time_exists = Schedule.objects.filter(
+                studio=studio,
+                date=date,
+                start_time=start_time,
+                availability='available'
+            ).exists()
+
+            if not start_time_exists:
+                raise ValidationError("Invalid start time. Please select an available start time.")
 
 
             schedule_qs = Schedule.objects.filter(
