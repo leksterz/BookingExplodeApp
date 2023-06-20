@@ -49,7 +49,7 @@ class BookingForm(forms.ModelForm):
             if selected_duration.total_seconds() % 3600 != 0:
                 raise ValidationError("Selected duration must be in full-hour increments.")
 
-            # Check if the selected start time is available in the schedule
+            # Check if the selected start time is available in the schedule 
             start_time_exists = Schedule.objects.filter(
                 studio=studio,
                 date=date,
