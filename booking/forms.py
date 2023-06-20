@@ -1,8 +1,8 @@
+from datetime import timedelta
 from django import forms
 from .models import Booking, Schedule
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-
 
 
 class BookingForm(forms.ModelForm):
@@ -16,6 +16,19 @@ class BookingForm(forms.ModelForm):
         self.fields['artist_phone_number'].initial = ''
         self.fields['artist_email'].initial = ''
 
+    ## The clean method is called during form validation, after the individual field validations have passed. 
+    # It is responsible for performing additional validation and cleaning the form data as needed.
+    # In the clean method, we retrieve the values of the relevant fields 
+    # (start_time, end_time, date, studio) from the form's cleaned_data dictionary.
+    # We first check if the start_time and end_time are equal. If they are, we raise a validation 
+    # error because a booking with zero duration is not valid.
+    # Next, we query the Schedule model to check if there are any available time slots that overlap with the selected start_time 
+    # and end_time. The Schedule objects should have the same studio, date, and fall within the range of the selected start_time and end_time.
+    # If any available time slots are found (schedule_qs is not empty), 
+    # it means that the selected start_time and end_time are within the available schedule, and the booking is considered valid.
+    # If no available time slots are found (schedule_qs is empty), 
+    # we raise a validation error indicating that the selected start_time and end_time are invalid.
+
     def clean(self):
         cleaned_data = super().clean()
         start_time = cleaned_data.get('start_time')
@@ -24,28 +37,47 @@ class BookingForm(forms.ModelForm):
         studio = cleaned_data.get('studio')
 
         if start_time and end_time and date and studio:
-            # Check if the selected start time and end time are within the available schedule
+            # Check if the start time and end time are equal
+            if start_time == end_time:
+                raise ValidationError("Start time and end time cannot be the same.")
+
+
+            selected_duration = timedelta(hours=end_time.hour - start_time.hour)
+            print(f"Selected Duration: {selected_duration}")
+
             schedule_qs = Schedule.objects.filter(
                 studio=studio,
                 date=date,
-                start_time__lte=start_time,
-                end_time__gte=end_time
-            )
-            if not schedule_qs.exists():
-                raise ValidationError("Invalid start time or end time.")
-            
-            
-            ##^^ Salikt taa lai var nobookot uz vairaakaam stundaam vienaa requestaa, ne tikai 1 stundu.
-            ##
+                start_time__lte=end_time,  # Changed from start_time__lte=start_time
+                end_time__gte=start_time,  # Changed from end_time__gte=end_time
+                availability='available'
+            ).order_by('start_time')
 
-            # Check if there are any conflicting bookings for the selected start time and end time
-            # booking_qs = Booking.objects.filter(
-            #     studio=studio,
-            #     date=date,
-            #     start_time__lte=start_time,
-            #     end_time__gte=end_time
-            # )
-            # if booking_qs.exists():
-            #     raise ValidationError("The selected time slot is already booked.")
+            print(f"Schedule QuerySet: {schedule_qs}")
+
+            available_slots = []
+            current_slot_start = start_time
+
+            for slot in schedule_qs:
+                if slot.start_time >= current_slot_start:
+                    available_slots.append(slot)
+                    current_slot_start = slot.end_time
+
+                if current_slot_start > end_time:
+                    break
+
+            print(f"Available Slots: {available_slots}")
+
+            total_duration = timedelta()
+            for slot in available_slots:
+                total_duration += timedelta(hours=slot.end_time.hour - slot.start_time.hour)
+
+            print(f"Total Duration: {total_duration}")
+
+            if total_duration < selected_duration:
+                raise ValidationError("Invalid start time or end time.")
+
         return cleaned_data
+
+
 
