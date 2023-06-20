@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django import forms
 from .models import Booking, Schedule
 from django.core.exceptions import ValidationError
@@ -41,15 +41,23 @@ class BookingForm(forms.ModelForm):
             if start_time == end_time:
                 raise ValidationError("Start time and end time cannot be the same.")
 
+            start_datetime = datetime.combine(datetime.today(), start_time)
+            end_datetime = datetime.combine(datetime.today(), end_time)
+            selected_duration = end_datetime - start_datetime
 
-            selected_duration = timedelta(hours=end_time.hour - start_time.hour)
+            if selected_duration.total_seconds() % 3600 != 0:
+                raise ValidationError("Selected duration must be in full-hour increments.")
+
             print(f"Selected Duration: {selected_duration}")
+
 
             schedule_qs = Schedule.objects.filter(
                 studio=studio,
                 date=date,
-                start_time__lte=end_time,  # Changed from start_time__lte=start_time
-                end_time__gte=start_time,  # Changed from end_time__gte=end_time
+                # start_time__lte filter with a reference time of 2 PM, 
+                # it will check if the start time of the time slot is less than or equal to 2 PM
+                start_time__lte=end_time,  
+                end_time__gte=start_time, 
                 availability='available'
             ).order_by('start_time')
 
