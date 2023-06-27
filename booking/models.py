@@ -37,8 +37,10 @@ class Booking(models.Model):
     status = models.CharField(max_length=8, choices=STATUS_CHOICES, default='pending')
 
     def __str__(self):
-        return f'Booking for {self.artist_name} with {self.engineer.name} at {self.studio.name} ({self.date}, {self.start_time} to {self.end_time})'
-
+        status_display = [status[1] for status in self.STATUS_CHOICES if status[0] == self.status]
+        status = status_display[0] if status_display else ''
+        return f'[{status.upper()}] | {self.date} | {self.start_time} to {self.end_time} | Artist: {self.artist_name} | Engineer: {self.engineer} | Studio: {self.studio}'
+    
 class Schedule(models.Model):
     AVAILABILITY_CHOICES = [
         ('available', 'Available'),
