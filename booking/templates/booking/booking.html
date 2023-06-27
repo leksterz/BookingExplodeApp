@@ -1,40 +1,154 @@
-
-
-{% block content %}
-  <h1>Book a Session</h1>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Book Now</button>
-  </form>
-  <hr>
-  <h2>Schedule</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Engineer</th>
-        <th>Studio</th>
-        <th>Start Time</th>
-        <th>End Time</th>
-        <th>Availability</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for schedule in schedule_list %}
-        <tr>
-          <td>{{ schedule.date }}</td>
-          <td>{{ schedule.engineer.name }}</td>
-          <td>{{ schedule.studio.name }}</td>
-          <td>{{ schedule.start_time }}</td>
-          <td>{{ schedule.end_time }}</td>
-          <td>{{ schedule.availability }}</td>
-        </tr>
-      {% empty %}
-        <tr>
-          <td colspan="6">No schedule available</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-{% endblock %}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Your Page Title</title>
+  <!-- Add the Bootstrap CSS link here -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    /* Custom CSS styles */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center">Book a Session</h1>
+    <form method="post">
+      {% csrf_token %}
+      {% if form.errors %}
+      <div class="alert alert-danger">
+        <p>There was an issue with submitting your booking.</p>
+        <p>Please use the schedule table below to find adequate availability </p>
+      </div>
+      {% endif %}
+      <div class="form-group">
+        {{ form.artist_name.label_tag }}
+        {{ form.artist_name }}
+        {% if form.artist_name.errors %}
+          {% for error in form.artist_name.errors %}
+            <p class="text-danger">{{ error }}</p>
+          {% endfor %}
+        {% endif %}
+      </div>
+      <div class="form-group">
+        {{ form.artist_phone_number.label_tag }}
+        {{ form.artist_phone_number }}
+        {% if form.artist_phone_number.errors %}
+          {% for error in form.artist_phone_number.errors %}
+            <p class="text-danger">{{ error }}</p>
+          {% endfor %}
+        {% endif %}
+      </div>
+      <div class="form-group">
+        {{ form.artist_email.label_tag }}
+        {{ form.artist_email }}
+        {% if form.artist_email.errors %}
+          {% for error in form.artist_email.errors %}
+            <p class="text-danger">{{ error }}</p>
+          {% endfor %}
+        {% endif %}
+      </div>
+      <div class="form-group">
+        {{ form.engineer.label_tag }}
+        {{ form.engineer }}
+        {% if form.engineer.errors %}
+          {% for error in form.engineer.errors %}
+            <p class="text-danger">{{ error }}</p>
+          {% endfor %}
+        {% endif %}
+      </div>
+      <div class="form-group">
+        {{ form.studio.label_tag }}
+        {{ form.studio }}
+        {% if form.studio.errors %}
+          {% for error in form.studio.errors %}
+            <p class="text-danger">{{ error }}</p>
+          {% endfor %}
+        {% endif %}
+      </div>
+      <div class="form-group">
+        {{ form.date.label_tag }}
+        {{ form.date }}
+        {% if form.date.errors %}
+          {% for error in form.date.errors %}
+            <p class="text-danger">{{ error }}</p>
+          {% endfor %}
+        {% endif %}
+      </div>
+      <div class="form-group">
+        {{ form.start_time.label_tag }}
+        {{ form.start_time }}
+        {% if form.start_time.errors %}
+          {% for error in form.start_time.errors %}
+            <p class="text-danger">{{ error }}</p>
+          {% endfor %}
+        {% endif %}
+      </div>
+      <div class="form-group">
+        {{ form.end_time.label_tag }}
+        {{ form.end_time }}
+        {% if form.end_time.errors %}
+          {% for error in form.end_time.errors %}
+            <p class="text-danger">{{ error }}</p>
+          {% endfor %}
+        {% endif %}
+      </div>
+      <button type="submit" class="btn btn-primary">Book Now</button>
+    </form>
+    <hr>
+    <h2 class="text-center">Filter Schedule by Date</h2>
+    <form method="get">
+      <div class="row">
+        <div class="col-md-8 col-lg-6">
+          <div class="form-group">
+            <label for="date" class="form-label">Select Date:</label>
+            <input type="date" id="date" name="date" class="form-control">
+          </div>
+        </div>
+        <div class="col-md-4 col-lg-2">
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary">Filter</button>
+          </div>
+        </div>
+      </div>
+    </form>
+    <hr>
+    <h2 class="text-center">Schedule</h2>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Engineer</th>
+            <th>Studio</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Availability</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for schedule in schedule_list %}
+            <tr>
+              <td>{{ schedule.date }}</td>
+              <td>{{ schedule.engineer.name }}</td>
+              <td>{{ schedule.studio.name }}</td>
+              <td>{{ schedule.start_time }}</td>
+              <td>{{ schedule.end_time }}</td>
+              <td>{{ schedule.availability }}</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6">No schedule available</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- Add the Bootstrap JavaScript scripts here if needed -->
+  <!-- ... -->
+</body>
+</html>

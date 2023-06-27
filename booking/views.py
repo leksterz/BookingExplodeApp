@@ -12,15 +12,19 @@ def BookingView(request):
             return redirect('booking:confirmation')  # Redirect to the confirmation page
     else:
         form = BookingForm()
-    
-    schedule_list = Schedule.objects.all()  # Fetch all schedule entries
+
+    # Filter the schedule based on the selected date (if provided in the request)
+    selected_date = request.GET.get('date')  # Get the selected date from the request's GET parameters
+    if selected_date:
+        schedule_list = Schedule.objects.filter(date=selected_date)
+    else:
+        schedule_list = Schedule.objects.all()
 
     context = {
         'form': form,
         'schedule_list': schedule_list,
     }
     return render(request, 'booking/booking.html', context)
-
 
 def schedule_view(request):
     # Fetch schedule data from the database
